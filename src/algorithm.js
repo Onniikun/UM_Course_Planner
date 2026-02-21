@@ -123,7 +123,8 @@ function hasConflict(newSection, currentSchedule) {
 
 function buildSchedules(courses, index, currentSchedule, allSchedules) {
   if (index === courses.length) {
-    if (currentSchedule.length > 0) {
+    // Only accept schedules that include ALL courses
+    if (currentSchedule.length === courses.length) {
       allSchedules.push([...currentSchedule]);
     }
     return;
@@ -141,9 +142,6 @@ function buildSchedules(courses, index, currentSchedule, allSchedules) {
       }
     }
   }
-
-  // ALSO allow skipping the course
-  buildSchedules(courses, index + 1, currentSchedule, allSchedules);
 }
 
 export function main(courses) {
@@ -172,7 +170,12 @@ export function main(courses) {
 
   timeCheck(courses);
 
-
+  for (const course of courses) {
+    if (!course.courseSections || course.courseSections.length === 0) {
+      console.log("No possible schedules: a course has no valid sections", course.name);
+      return [];
+    }
+  }
   // Generate schedules based on filtered courses and constraints
   const schedules = scheduler(courses);
 
