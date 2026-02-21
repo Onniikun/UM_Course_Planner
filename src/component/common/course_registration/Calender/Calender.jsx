@@ -18,7 +18,6 @@ export function Calender() {
 
   const location = useLocation();
   const courses = location.state?.courses || []; // get courses from Department
-  const dept = location.state?.department || "Unknown Department"; // get department from Department
 
   for (const course of courses) {
     console.log(`Course: ${course.name}`);
@@ -61,7 +60,7 @@ export function Calender() {
           ))}
         </ul>
 
-        <h2>Generated Schedules for {dept}</h2>
+        <h2>Generated Schedules:</h2>
         {schedules.length === 0 ? (
           <p>No schedules generated.</p>
         ) : (

@@ -11,6 +11,7 @@ import winterCourseList from '../../../winterSummerCourseList.csv?raw';
 const courseMap = loadCourses(fallCourseList); // Load courses once at the top level
 
 const selectedCourses = []; // global accumulator
+let dept = "";
 
 export function Department() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export function Department() {
 
   useEffect(() => {
     if (selectedDepartment) {
-      const dept = selectedDepartment.value;
+      dept = selectedDepartment.value;
       const major = Array.from(courseMap.entries())
         .filter(([courseName]) => courseName.startsWith(dept))
         .map(([courseName, course]) => ({
