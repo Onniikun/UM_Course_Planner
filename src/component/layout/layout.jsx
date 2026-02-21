@@ -4,11 +4,11 @@ import { Footer } from './footer/footer';
 import { Outlet } from 'react-router-dom';
 
 export function Layout() {
-    return (
-        <>
+  return (
+    <>
         <Navbar />
         <Outlet />
         <Footer />
-        </>
-    );
+    </>
+  );
 }

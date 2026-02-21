@@ -1,4 +1,5 @@
 import "./contact.css"
+import React from 'react';
 
 export function Contact() {
     return (
@@ -19,5 +20,7 @@ export function Contact() {
                 </a>
                 </div>
             </div>
+            <h1>Contact</h1>
+        </div>
     );
 }
