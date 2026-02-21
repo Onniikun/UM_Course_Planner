@@ -20,7 +20,5 @@ export function Contact() {
                 </a>
                 </div>
             </div>
-            <h1>Contact</h1>
-        </div>
     );
 }
