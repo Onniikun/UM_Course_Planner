@@ -1,7 +1,6 @@
-import { output } from './mikeOut.js'
 import userInput from './assets/userInput.json' with { type: "json" };
 
-export function filter() {
+export function filter(output) {
   if (!userInput) {
     console.error("User input failed to load.");
     return;
@@ -12,7 +11,7 @@ export function filter() {
     return;
   }
 
-  const courses = output(); // All courses available
+  const courses = output // All courses available
   const department = userInput.department; // Department the user wants to take courses in
   const userInputCourses = JSON.parse(JSON.stringify(userInput.courseNumbers)); // Courses the user wants to take
 
@@ -21,6 +20,7 @@ export function filter() {
 
   for (const courseName of userInputCourses) {
     const fullCourseName = `${department} ${courseName}`;
+    console.log(`Looking for course: ${fullCourseName}`);
     if (courses.has(fullCourseName)) {
       filteredCourses.push(courses.get(fullCourseName));
     } else {

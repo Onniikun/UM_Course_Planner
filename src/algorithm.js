@@ -1,10 +1,4 @@
 import constraintsJson from './assets/constraints.json' with { type: "json" };
-import { output } from './mikeOut.js';
-import { filter } from './filterCourses.js';
-
-// global courses list from user input
-let courses = filter();
-
 
 function dayCheck(courses) {
   for (let i = 0; i < courses.length; i++) {
@@ -19,20 +13,26 @@ function dayCheck(courses) {
     for (let j = 0; j < sections.length; j++) {
       const section = sections[j];
 
+      // Make sure daysOfWeek is an array before checking for MWF constraint
       if (!Array.isArray(section.daysOfWeek)) {
         continue;
       }
 
+      // Check if MWF constraint is enabled
       const allowedMWF = constraintsJson.isMWF;
 
+      // Check if the section meets the MWF requirement
       const isMWF =
         section.daysOfWeek.includes("MONDAY") ||
         section.daysOfWeek.includes("WEDNESDAY") ||
         section.daysOfWeek.includes("FRIDAY");
 
       if (allowedMWF && !isMWF) {
-        sections.splice(j, 1);
-        j--;
+        sections.splice(j, 1); // remove the section if it doesn't meet the MWF requirement
+        j--; // adjust index after removal
+      } else if (!allowedMWF && isMWF) {
+        sections.splice(j, 1); // remove the section if it doesn't meet the non-MWF requirement
+        j--; // adjust index after removal
       }
     }
   }
@@ -146,7 +146,9 @@ function buildSchedules(courses, index, currentSchedule, allSchedules) {
   buildSchedules(courses, index + 1, currentSchedule, allSchedules);
 }
 
-export function main() {
+export function main(courses) {
+  console.log("Initial Courses:", courses);
+
   if (!constraintsJson) {
     console.error("Constraints failed to load.");
     return;
@@ -157,7 +159,24 @@ export function main() {
     return;
   }
 
+  dayCheck(courses);
+
+
+  console.log(
+    "After dayCheck:",
+    courses.map(c => ({
+      name: c.name,
+      sections: c.courseSections.map(s => s.daysOfWeek)
+    }))
+  );
+
+  timeCheck(courses);
+
+
+  // Generate schedules based on filtered courses and constraints
   const schedules = scheduler(courses);
 
   console.log("Generated Schedules:", schedules);
+
+  return schedules;
 }
