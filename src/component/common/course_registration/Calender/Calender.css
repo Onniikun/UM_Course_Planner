@@ -1,4 +1,5 @@
 .sx-react-calendar-wrapper {
+  position: relative;
   width: 1200px;
   max-width: 100vw;
   height: 750px;
