@@ -66,8 +66,7 @@ function convertCoursesToEvents(courses) {
       if (matchingDay) {
         events.push({
           id: course.CRN,
-          name: course.name,
-          title: course.name,
+          title: course.name + " " + course.ID,
           start: Temporal.ZonedDateTime.from({
             year: current.getFullYear(),
             month: current.getMonth() + 1,
@@ -159,7 +158,7 @@ export function Calender() {
               <ul>
                 {schedule.map((section, idx) => (
                   <li key={idx}>
-                    Name: {section.name}, CRN: {section.CRN}, Time: {section.timeSlot.startTime}-{section.timeSlot.endTime}
+                    {section.name} {section.ID}, CRN: {section.CRN}, Time: {section.timeSlot.startTime}-{section.timeSlot.endTime}
                   </li>
                 ))}
               </ul>
