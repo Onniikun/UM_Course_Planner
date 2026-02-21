@@ -5,6 +5,12 @@ import 'temporal-polyfill/global'
 import '@schedule-x/theme-default/dist/index.css'
 import { useEffect, useState } from 'react'
 import './Calender.css'
+
+import { Section } from "../../../../Section.js";
+import { TimeSlot } from "../../../../TimeSlot.js";
+import { DateTime } from "../../../../DateTime.js";
+import { DaysOfWeek } from "../../../../DaysOfWeek.js";
+
 import { useLocation } from 'react-router-dom';
 import { main } from '../../../../algorithm';
 import { filter } from '../../../../filterCourses.js';
@@ -13,6 +19,80 @@ import fallCourseList from '../../../../fallCourseList.csv?raw';
 import winterCourseList from '../../../../winterSummerCourseList.csv?raw';
 
 const courseMap = loadCourses(fallCourseList); // Load courses once at the top level
+
+function convertMinutes(minutes) {
+  return {
+    hour: Math.floor(minutes / 60),
+    minute: minutes % 60,
+  };
+}
+
+function convertCoursesToEvents(courses) {
+  const dayOfWeekMap = {
+    MONDAY: 1,
+    TUESDAY: 2,
+    WEDNESDAY: 3,
+    THURSDAY: 4,
+    FRIDAY: 5,
+    SATURDAY: 6,
+    SUNDAY: 0,
+  };
+
+  const events = [];
+
+  courses.forEach((course) => {
+    if (!course.daysOfWeek || course.daysOfWeek.length === 0) return;
+
+    const { hour: startHour, minute: startMinute } = convertMinutes(course.timeSlot.startTime);
+    const { hour: endHour, minute: endMinute } = convertMinutes(course.timeSlot.endTime);
+
+    let current = new Date(
+      course.timeSlot.startDate.year,
+      course.timeSlot.startDate.month - 1,
+      course.timeSlot.startDate.day
+    );
+    const end = new Date(
+      course.timeSlot.endDate.year,
+      course.timeSlot.endDate.month - 1,
+      course.timeSlot.endDate.day
+    );
+
+    while (current <= end) {
+      const jsDay = current.getDay();
+      const matchingDay = course.daysOfWeek.some(
+        (d) => dayOfWeekMap[d] === jsDay
+      );
+
+      if (matchingDay) {
+        events.push({
+          id: `${course.ID}_${course.CRN}_${current.getFullYear()}_${current.getMonth() + 1}_${current.getDate()}`, // safe id
+          name: `${course.name} (${course.ID})\nInstructor: ${course.instructor}\nCredits: ${course.credits}`, // display course info
+          start: Temporal.ZonedDateTime.from({
+            year: current.getFullYear(),
+            month: current.getMonth() + 1,
+            day: current.getDate(),
+            hour: startHour,
+            minute: startMinute,
+            timeZone: "America/Winnipeg",
+          }),
+          end: Temporal.ZonedDateTime.from({
+            year: current.getFullYear(),
+            month: current.getMonth() + 1,
+            day: current.getDate(),
+            hour: endHour,
+            minute: endMinute,
+            timeZone: "America/Winnipeg",
+          }),
+        });
+      }
+
+      current.setDate(current.getDate() + 1);
+    }
+  });
+
+  return events;
+}
+
 
 export function Calender() {
 
@@ -38,25 +118,27 @@ export function Calender() {
     }
   }
 
-  const classes = useState(() => createEventsServicePlugin())[0]
+  const eventsService = useState(() => createEventsServicePlugin())[0];
+
+  const events = convertCoursesToEvents(schedules[0] || []); // Schedule input for the calendar
+
   const calender = useCalendarApp({
-    views: [createViewMonthGrid()],
-    classes: [
-      {
-        id: 1,
-        title: 'Class 1',
-        start: Temporal.PlainDate.from('2026-12-16'),
-        end: Temporal.PlainDate.from('2026-12-16'),
-      },
+    views: [
+      createViewWeek({ firstDayOfWeek: 0 }),
+      createViewMonthGrid({ firstDayOfWeek: 0 }),
     ],
-    plugins: [classes]
+    events: events,
+    plugins: [eventsService],
   });
   useEffect(() => {
-    classes.getAll()
-  }, [])
+    eventsService.getAll();
+  }, []);
   return (
     <>
       <div>
+        <div className="calendar-wrapper">
+          <ScheduleXCalendar calendarApp={calender} />
+        </div>
         <h2>Submitted Courses</h2>
         <ul>
           {courses.map((course, index) => (
