@@ -1,71 +1,103 @@
-import constraintsJson from './assets/constraints.json' with { type: "json" };
 
-function dayCheck(courses) {
+function filterSectionsByDay(sections, constraints) {
+  const allowedMWF = constraints.isMWF;
+  const allowedTT = constraints.isTT;
+
+  for (let j = 0; j < sections.length; j++) {
+    const section = sections[j];
+
+    if (!Array.isArray(section.daysOfWeek)) {
+      continue;
+    }
+
+    const isMWF =
+      section.daysOfWeek.includes("MONDAY") ||
+      section.daysOfWeek.includes("WEDNESDAY") ||
+      section.daysOfWeek.includes("FRIDAY");
+
+    const isTT =
+      section.daysOfWeek.includes("TUESDAY") ||
+      section.daysOfWeek.includes("THURSDAY");
+
+    // If both allowed, don't filter by day
+    if (allowedMWF && allowedTT) {
+      continue;
+    }
+
+    // Only MWF allowed
+    if (allowedMWF && !isMWF) {
+      sections.splice(j, 1);
+      j--;
+    }
+    // Only TT allowed
+    else if (allowedTT && !isTT) {
+      sections.splice(j, 1);
+      j--;
+    }
+    // If neither checkbox selected, do not filter by day
+  }
+}
+
+function dayCheck(courses, constraints) {
   for (let i = 0; i < courses.length; i++) {
     const course = courses[i];
 
-    if (!course.courseSections || !Array.isArray(course.courseSections)) {
-      continue;
+    // Filter lecture sections
+    if (Array.isArray(course.courseSections)) {
+      filterSectionsByDay(course.courseSections, constraints);
     }
 
-    const sections = course.courseSections;
-
-    for (let j = 0; j < sections.length; j++) {
-      const section = sections[j];
-
-      // Make sure daysOfWeek is an array before checking for MWF constraint
-      if (!Array.isArray(section.daysOfWeek)) {
-        continue;
-      }
-
-      // Check if MWF constraint is enabled
-      const allowedMWF = constraintsJson.isMWF;
-
-      // Check if the section meets the MWF requirement
-      const isMWF =
-        section.daysOfWeek.includes("MONDAY") ||
-        section.daysOfWeek.includes("WEDNESDAY") ||
-        section.daysOfWeek.includes("FRIDAY");
-
-      if (allowedMWF && !isMWF) {
-        sections.splice(j, 1); // remove the section if it doesn't meet the MWF requirement
-        j--; // adjust index after removal
-      } else if (!allowedMWF && isMWF) {
-        sections.splice(j, 1); // remove the section if it doesn't meet the non-MWF requirement
-        j--; // adjust index after removal
-      }
+    // Filter lab sections (NEW)
+    if (Array.isArray(course.labSections)) {
+      filterSectionsByDay(course.labSections, constraints);
     }
   }
 }
 
-function timeCheck(courses) {
-  const earliestTime = Number(constraintsJson.earliest);
-  const latestTime = Number(constraintsJson.latest);
+function filterSectionsByTime(sections, constraints) {
+  const earliestTime = Number(constraints.earliestTime);
+  const latestTime = Number(constraints.latestTime);
 
+  for (let j = 0; j < sections.length; j++) {
+    const section = sections[j];
+
+    if (!section.timeSlot) {
+      continue;
+    }
+
+    const start = section.timeSlot.startTime;
+    const end = section.timeSlot.endTime;
+
+    // If user left inputs empty/null, skip that constraint
+    if (!isNaN(earliestTime) && start < earliestTime) {
+      sections.splice(j, 1);
+      j--;
+      continue;
+    }
+
+    if (!isNaN(latestTime) && end > latestTime) {
+      sections.splice(j, 1);
+      j--;
+    }
+  }
+}
+
+function timeCheck(courses, constraints) {
   for (let i = 0; i < courses.length; i++) {
-    const currCourse = courses[i];
+    const course = courses[i];
 
-    if (!currCourse.courseSections || !Array.isArray(currCourse.courseSections)) {
-      continue;
+    // Filter lecture sections
+    if (Array.isArray(course.courseSections)) {
+      filterSectionsByTime(course.courseSections, constraints);
     }
 
-    for (let j = 0; j < currCourse.courseSections.length; j++) {
-      const currSection = currCourse.courseSections[j];
-
-      if (!currSection.timeSlot) {
-        continue;
-      }
-
-      const start = currSection.timeSlot.startTime;
-
-      // Remove section if outside time window
-      if (start < earliestTime || start > latestTime) {
-        currCourse.courseSections.splice(j, 1);
-        j--;
-      }
+    // Filter lab sections (NEW)
+    if (Array.isArray(course.labSections)) {
+      filterSectionsByTime(course.labSections, constraints);
     }
   }
 }
+
 
 function scheduler(courses) {
   const schedules = [];
@@ -74,14 +106,6 @@ function scheduler(courses) {
 }
 
 function sectionsOverlap(section1, section2) {
-
-  console.log(
-    "Comparing:",
-    `${section1.CRN} (${section1.timeSlot.startTime}-${section1.timeSlot.endTime})`,
-    "vs",
-    `${section2.CRN} (${section2.timeSlot.startTime}-${section2.timeSlot.endTime})`
-  );
-
   if (!section1.daysOfWeek || !section2.daysOfWeek) {
     return false;
   }
@@ -96,7 +120,6 @@ function sectionsOverlap(section1, section2) {
     }
   }
 
-  // If no shared days, cannot overlap
   if (!sharedDay) return false;
 
   if (!section1.timeSlot || !section2.timeSlot) {
@@ -117,63 +140,104 @@ function hasConflict(newSection, currentSchedule) {
       return true;
     }
   }
-
   return false;
 }
 
 function buildSchedules(courses, index, currentSchedule, allSchedules) {
   if (index === courses.length) {
-    if (currentSchedule.length > 0) {
-      allSchedules.push([...currentSchedule]);
-    }
+    allSchedules.push([...currentSchedule]);
     return;
   }
 
   const course = courses[index];
 
-  // Try taking the course
-  if (course.courseSections && course.courseSections.length > 0) {
-    for (const section of course.courseSections) {
-      if (!hasConflict(section, currentSchedule)) {
-        currentSchedule.push(section);
+  if (!course.courseSections || course.courseSections.length === 0) {
+    return;
+  }
+
+  for (const lecture of course.courseSections) {
+    // Skip if lecture conflicts
+    if (hasConflict(lecture, currentSchedule)) {
+      continue;
+    }
+
+    // if lab required
+    if (Array.isArray(course.labSections) && course.labSections.length > 0) {
+      for (const lab of course.labSections) {
+
+        if (
+          hasConflict(lab, currentSchedule) ||
+          sectionsOverlap(lecture, lab)
+        ) {
+          continue;
+        }
+
+        // Add both
+        currentSchedule.push(lecture);
+        currentSchedule.push(lab);
+
         buildSchedules(courses, index + 1, currentSchedule, allSchedules);
+
+        // Backtrack (remove lab and lecture)
+        currentSchedule.pop();
         currentSchedule.pop();
       }
     }
+    else {
+      currentSchedule.push(lecture);
+      buildSchedules(courses, index + 1, currentSchedule, allSchedules);
+      currentSchedule.pop();
+    }
   }
-
-  // ALSO allow skipping the course
-  buildSchedules(courses, index + 1, currentSchedule, allSchedules);
 }
 
-export function main(courses) {
-  console.log("Initial Courses:", courses);
+export function main(courses, constraints) {
+  console.log("Constraints:", constraints);
 
-  if (!constraintsJson) {
-    console.error("Constraints failed to load.");
-    return;
-  }
+  // Ensure constraints object exists and has expected keys
+  const safeConstraints = {
+    isMWF: constraints?.isMWF ?? false,
+    isTT: constraints?.isTT ?? false,
+    earliestTime: constraints?.earliestTime ?? null,
+    latestTime: constraints?.latestTime ?? null,
+  };
 
   if (!Array.isArray(courses)) {
     console.error("Courses must be an array.");
-    return;
+    return [];
   }
 
-  dayCheck(courses);
-
+  // Apply day filtering (uses isMWF / isTT)
+  dayCheck(courses, safeConstraints);
 
   console.log(
     "After dayCheck:",
     courses.map(c => ({
       name: c.name,
-      sections: c.courseSections.map(s => s.daysOfWeek)
+      lectureSections: c.courseSections?.map(s => s.daysOfWeek) || [],
+      labSections: c.labSections?.map(s => s.daysOfWeek) || []
     }))
   );
 
-  timeCheck(courses);
+  // Apply time filtering (uses earliestTime / latestTime)
+  timeCheck(courses, safeConstraints);
+
+  // Validate remaining sections
+  for (const course of courses) {
+    // Must have at least one lecture
+    if (!course.courseSections || course.courseSections.length === 0) {
+      console.log("No possible schedules: no valid lecture sections for", course.name);
+      return [];
+    }
 
 
-  // Generate schedules based on filtered courses and constraints
+    // Only fail if lecture sections are gone
+    if (!course.courseSections || course.courseSections.length === 0) {
+      console.log("No possible schedules: no valid lecture sections for", course.name);
+      return [];
+    }
+  }
+
   const schedules = scheduler(courses);
 
   console.log("Generated Schedules:", schedules);

@@ -249,7 +249,6 @@ export const courseOptions = {
   "YDSH": generateCourseOptions("YDSH"),
 }
 
-
 function generateCourseOptions(title) {
     title : Array.from(courseMap.entries())
     .filter(([courseName]) => courseName.startsWith(title))

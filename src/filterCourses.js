@@ -1,6 +1,7 @@
-import userInput from './assets/userInput.json' with { type: "json" };
+export function filter(output, userInput) {
+  // user input is an array of class NAMES e.g. COMP 1010
+  console.log("Filtering courses with user input:", userInput);
 
-export function filter(output) {
   if (!userInput) {
     console.error("User input failed to load.");
     return;
@@ -12,14 +13,12 @@ export function filter(output) {
   }
 
   const courses = output // All courses available
-  const department = userInput.department; // Department the user wants to take courses in
-  const userInputCourses = JSON.parse(JSON.stringify(userInput.courseNumbers)); // Courses the user wants to take
 
   // Filter courses based on user input
   const filteredCourses = new Array()
 
-  for (const courseName of userInputCourses) {
-    const fullCourseName = `${department} ${courseName}`;
+  for (const course of userInput) {
+    const fullCourseName = course.name;
     console.log(`Looking for course: ${fullCourseName}`);
     if (courses.has(fullCourseName)) {
       filteredCourses.push(courses.get(fullCourseName));

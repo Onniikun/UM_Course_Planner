@@ -1,5 +1,6 @@
 export class Section {
-    constructor(CRN, credits, ID, instructor, distanceCourse=false, timeSlot, daysOfWeek=[]) {
+    constructor(name, CRN, credits, ID, instructor, distanceCourse=false, timeSlot, daysOfWeek=[]) {
+        this.name = name;
         this.CRN = CRN;
         this.credits = credits;
         this.ID = ID;

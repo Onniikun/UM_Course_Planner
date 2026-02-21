@@ -1,4 +1,4 @@
-import Select from 'react-select'
+import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import './Department.css';
 import logo from '../../../apis/logo-2.png';
@@ -7,68 +7,133 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadCourses } from '../../../courseLoader';
 import fallCourseList from '../../../fallCourseList.csv?raw';
-import winterCourseList from '../../../winterSummerCourseList.csv?raw';
-import { main } from '../../../algorithm';
-import { filter } from '../../../filterCourses.js';
 
-const courseMap = loadCourses(fallCourseList); // Load courses once at the top level
+const courseMap = loadCourses(fallCourseList); // Load once
 
 export function Department() {
+  const navigate = useNavigate();
+  const animatedComponents = makeAnimated();
 
-  const navigate = useNavigate()
   const [selectedDepartment, setSelectedDepartment] = useState(null);
-  const [optionMajor, setoptionMajor] = useState([]);
-  const [selectedMajor, setSelectedMajor] = useState(null);
-  // iterates data after every new state.
-useEffect(() => {
-  if (selectedDepartment) {
-    const dept = selectedDepartment.value;
+  const [optionMajor, setOptionMajor] = useState([]);
+  const [selectedMajor, setSelectedMajor] = useState([]);
+  const [selectedCourses, setSelectedCourses] = useState([]);
+  const [submitted, setSubmitted] = useState(false);
+  const [isMWF, setIsMWF] = useState(false);
+  const [isTT, setIsTT] = useState(false);
+  const [earliestTime, setEarliestTime] = useState('');
+  const [latestTime, setLatestTime] = useState('');
 
-    const major = Array.from(courseMap.entries())
-      .filter(([courseName]) => courseName.startsWith(dept))
-      .map(([courseName, course]) => ({
-        value: courseName,
-        label: `${courseName} - ${course.title}`
-      }));
+  useEffect(() => {
+    if (selectedDepartment) {
+      const dept = selectedDepartment.value;
 
-    console.log("Dept:", dept);
-    console.log("Total courses:", courseMap.size);
-    console.log("Filtered courses:", major.length);
+      const major = Array.from(courseMap.entries())
+        .filter(([courseName]) => courseName.startsWith(dept))
+        .map(([courseName, course]) => ({
+          value: courseName,
+          label: `${courseName} - ${course.title}`,
+        }));
 
-    setoptionMajor(major);
-    setSelectedMajor(null);
-  } else {
-    setoptionMajor([]);
-  }
-}, [selectedDepartment]);
+      setOptionMajor(major);
+      setSelectedMajor([]); // reset course picker only (not submitted courses)
+    } else {
+      setOptionMajor([]);
+      setSelectedMajor([]);
+    }
+  }, [selectedDepartment]);
 
-  const handleChange = (option) => {
+  const handleDepartmentChange = (option) => {
     setSelectedDepartment(option);
-  }
+    setSubmitted(false); // reset visual state when changing dept
+  };
 
   const handleMajorChange = (option) => {
-    setSelectedMajor(option);
-  }
+    setSelectedMajor(option || []);
+    setSubmitted(false);
+  };
 
-  const animatedComponents = makeAnimated();
+  const handleSubmit = () => {
+    if (selectedMajor.length === 0) return;
+
+    const newCourses = selectedMajor
+      .map(c => courseMap.get(c.value))
+      .filter(Boolean);
+
+    // Prevent duplicates
+    setSelectedCourses(prev => {
+      const existing = new Set(prev.map(c => c.name));
+      const merged = [
+        ...prev,
+        ...newCourses.filter(c => !existing.has(c.name))
+      ];
+      return merged;
+    });
+
+    setSubmitted(true); // visual feedback
+    setSelectedMajor([]);
+  };
+
   return (
     <div>
        <img className="logo" src={logo} alt="University of Manitoba Logo" />
       <h1>Course Registration</h1>
       <p>Here you can register for your Department/Major</p>
+
+      <ul>
+        <input
+          type="checkbox"
+          id="isMWF"
+          checked={isMWF}
+          onChange={(e) => setIsMWF(e.target.checked)}
+        />
+        <label htmlFor="isMWF">MWF Classes</label>
+
+        <input
+          type="checkbox"
+          id="isTT"
+          checked={isTT}
+          onChange={(e) => setIsTT(e.target.checked)}
+        />
+        <label htmlFor="isTT">TT Classes</label>
+
+        <li>
+          <label htmlFor="earliest">Earliest Time (Minutes since 12 am):</label>
+          <input
+            type="number"
+            id="earliest"
+            value={earliestTime}
+            onChange={(e) => setEarliestTime(e.target.value)}
+          />
+        </li>
+
+        <li>
+          <label htmlFor="latest">Latest Time (Minutes since 12 am):</label>
+          <input
+            type="number"
+            id="latest"
+            value={latestTime}
+            onChange={(e) => setLatestTime(e.target.value)}
+          />
+        </li>
+      </ul>
+
       <div className="courses-container">
-        {/*Major Selection*/}
-        <Select className="custom-select"
-          placeholder={"Subject..."}
+        {/* Department Selection */}
+        <Select
+          className="custom-select"
+          placeholder="Subject..."
           closeMenuOnSelect={false}
           components={animatedComponents}
           options={subjectOptions}
           value={selectedDepartment}
-          onChange={handleChange}
+          onChange={handleDepartmentChange}
         />
+
         {/* Course Selection */}
-        <Select className="custom-select"
-          placeholder={"Course..."}
+        <Select
+          className="custom-select"
+          placeholder="Course..."
           components={animatedComponents}
           options={optionMajor}
           value={selectedMajor}
@@ -76,22 +141,52 @@ useEffect(() => {
           isDisabled={!selectedDepartment}
           isMulti
         />
-        <button className="button"
-          onClick={() => {
-            if (!selectedDepartment || !selectedMajor) {
-              alert("Please select a Major or a Course")
-            } else {
-              navigate("Calender", {
-                state: {
-                  selectedDepartment, selectedMajor
-                }
-              })
-            }
-          }}
+
+        {/* Submit Button with Visual Feedback */}
+        <button
+          className={`button ${submitted ? 'submitted' : ''}`}
+          onClick={handleSubmit}
+          disabled={selectedMajor.length === 0}
         >
-          Submit
+          {submitted ? 'Added ✓' : 'Add Courses'}
         </button>
       </div>
+
+      {/* Selected Courses Display (persistent) */}
+      <div className="selected-courses">
+        <h2>Selected Courses:</h2>
+        <ul>
+          {selectedCourses.map((course, index) => (
+            <li key={index}>
+              {course.name} - {course.title}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Next Button now uses ALL submitted courses */}
+      <button
+        className="button"
+        onClick={() => {
+          if (selectedCourses.length === 0) {
+            alert('Please submit at least one course');
+          } else {
+            navigate('Calender', {
+              state: {
+                courses: selectedCourses,
+                constraints: {
+                  isMWF,
+                  isTT,
+                  earliestTime: Number(earliestTime),
+                  latestTime: Number(latestTime),
+                }
+              }
+            });
+          }
+        }}
+      >
+        Next
+      </button>
     </div>
   );
 }
