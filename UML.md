@@ -2,6 +2,7 @@
 classDiagram
     class Course {
         -String name
+        -String title
         -boolean spanning
         -boolean requiresLab
         -boolean passFailCourse
@@ -39,7 +40,7 @@ classDiagram
         SUNDAY
     }
 
-    class Date {
+    class DateTime {
         -int year
         -int month
         -int day

@@ -1,4 +1,4 @@
-class Date {
+class DateTime {
     constructor(year, month, day) {
         this.year = year;
         this.month = month;
