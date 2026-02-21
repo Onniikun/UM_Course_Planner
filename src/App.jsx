@@ -1,6 +1,5 @@
 import './App.css'
 import { Layout } from './component/layout/layout';
-import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom'
 import { Department } from './component/common/course_registration/Department';
 import { Calender } from '../src/component/common/course_registration/Calender/Calender'

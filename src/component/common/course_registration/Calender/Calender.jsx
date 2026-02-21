@@ -7,25 +7,37 @@ import { useEffect, useState } from 'react'
 import './Calender.css'
 
 export function Calender() {
-    const classes = useState(() => createEventsServicePlugin())[0]
+    const eventsService = useState(() => createEventsServicePlugin())[0]
     const calender = useCalendarApp({
-    views: [createViewMonthGrid()],
-    classes: [
+    views: [createViewDay(), createViewWeek(), createViewMonthGrid(), createViewMonthAgenda()],
+    events: [
         {
         id: 1,
         title: 'Class 1',
-        start: Temporal.PlainDate.from('2026-12-16'),
-        end: Temporal.PlainDate.from('2026-12-16'),
+        start: Temporal.PlainDate.from({
+            year: 2026,
+            month: 2,
+            day: 16,
+            hour: 9,
+            minute: 0
+        }),
+        end: Temporal.PlainDate.from({
+            year: 2026,
+            month: 2,
+            day: 16,
+            hour: 10,
+            minute: 0
+        }),
         },
     ],
-    plugins: [classes]
+    plugins: [eventsService]
 });
 useEffect(() => {
-    classes.getAll() 
+    eventsService.getAll() 
 }, [])
     return(
         <>
-        <div>
+        <div className="calendar-wrapper">
             <ScheduleXCalendar calendarApp={calender} />
         </div>
         </>
