@@ -6,3 +6,17 @@
   margin-top: 1.5%;
   max-height: 90vh;
 }
+
+body {
+  height: 100px;
+
+}
+
+#container {
+    display: flex;
+    flex-direction: horizontal¡;
+}
+
+#generated-container {
+  max-height: 800px;
+}

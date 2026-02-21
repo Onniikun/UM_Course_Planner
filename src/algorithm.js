@@ -240,7 +240,13 @@ export function main(courses, constraints) {
 
   const schedules = scheduler(courses);
 
+  const reducedSchedules = [];
+
+  for (let i = 0; i < 3; i++) {
+    reducedSchedules[i] = schedules[i]; 
+  }
+
   console.log("Generated Schedules:", schedules);
 
-  return schedules;
+  return reducedSchedules;
 }
