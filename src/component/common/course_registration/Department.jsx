@@ -1,7 +1,7 @@
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 import './Department.css';
-import { mockOptions, mockMajorOptions } from '../../../apis/mockData';
+import { subjectOptions, courseOptions } from '../../../apis/data.js';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadCourses } from '../../../courseLoader';
@@ -19,15 +19,27 @@ export function Department() {
   const [optionMajor, setoptionMajor] = useState([]);
   const [selectedMajor, setSelectedMajor] = useState(null);
   // iterates data after every new state.
-  useEffect(() => {
-    if (selectedDepartment) {
-      const major = mockMajorOptions[selectedDepartment.value] || [];
-      setoptionMajor(major);
-      setSelectedMajor(null);
-    } else {
-      setoptionMajor([]);
-    }
-  }, [selectedDepartment]);
+useEffect(() => {
+  if (selectedDepartment) {
+    const dept = selectedDepartment.value;
+
+    const major = Array.from(courseMap.entries())
+      .filter(([courseName]) => courseName.startsWith(dept))
+      .map(([courseName, course]) => ({
+        value: courseName,
+        label: `${courseName} - ${course.title}`
+      }));
+
+    console.log("Dept:", dept);
+    console.log("Total courses:", courseMap.size);
+    console.log("Filtered courses:", major.length);
+
+    setoptionMajor(major);
+    setSelectedMajor(null);
+  } else {
+    setoptionMajor([]);
+  }
+}, [selectedDepartment]);
 
   const handleChange = (option) => {
     setSelectedDepartment(option);
@@ -48,7 +60,7 @@ export function Department() {
           placeholder={"Subject..."}
           closeMenuOnSelect={false}
           components={animatedComponents}
-          options={mockOptions}
+          options={subjectOptions}
           value={selectedDepartment}
           onChange={handleChange}
         />
