@@ -1,26 +1,32 @@
-import { useLocation } from "react-router-dom"
+import { useCalendarApp, ScheduleXCalendar } from '@schedule-x/react'
+import { createViewDay,createViewMonthAgenda, createViewMonthGrid, createViewWeek } from '@schedule-x/calendar'
+import { createEventsServicePlugin } from '@schedule-x/events-service'
+import 'temporal-polyfill/global'
+import '@schedule-x/theme-default/dist/index.css'
+import { useEffect, useState } from 'react'
+import './Calender.css'
 
 export function Calender() {
-    const location = useLocation()
-    const { selectedDepartment, selectedMajor } = location.state || {};
+    const classes = useState(() => createEventsServicePlugin())[0]
+    const calender = useCalendarApp({
+    views: [createViewMonthGrid()],
+    classes: [
+        {
+        id: 1,
+        title: 'Class 1',
+        start: Temporal.PlainDate.from('2026-12-16'),
+        end: Temporal.PlainDate.from('2026-12-16'),
+        },
+    ],
+    plugins: [classes]
+});
+useEffect(() => {
+    classes.getAll() 
+}, [])
     return(
         <>
         <div>
-            <h3>
-                Your classes
-            </h3>
-            <p>
-                Department: {selectedDepartment ? selectedDepartment.label: "None"}
-            </p>
-            <p>
-                {/* 
-                Iteration conndition if its null
-                Then loops throught json data.
-                */}
-                Major: {selectedMajor && selectedMajor.length > 0 ? 
-                selectedMajor.map(m => m.label).join(", ")
-                : "None"}
-            </p>
+            <ScheduleXCalendar calendarApp={calender} />
         </div>
         </>
     )
