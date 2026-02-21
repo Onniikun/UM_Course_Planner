@@ -1,4 +1,4 @@
-class TimeSlot {
+export class TimeSlot {
     constructor(startTime, endTime, startDate, endDate) {
         this.startTime = startTime;
         this.endTime = endTime;
@@ -6,5 +6,3 @@ class TimeSlot {
         this.endDate = endDate;
     }
 }
-
-module.exports = TimeSlot;

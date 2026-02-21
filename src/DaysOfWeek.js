@@ -1,4 +1,4 @@
-const DaysOfWeek = Object.freeze({
+export const DaysOfWeek = Object.freeze({
     MONDAY: "MONDAY",
     TUESDAY: "TUESDAY",
     WEDNESDAY: "WEDNESDAY",
@@ -7,5 +7,3 @@ const DaysOfWeek = Object.freeze({
     SATURDAY: "SATURDAY",
     SUNDAY: "SUNDAY"
 });
-
-module.exports = DaysOfWeek;

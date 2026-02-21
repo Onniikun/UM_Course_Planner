@@ -1,4 +1,4 @@
-class Section {
+export class Section {
     constructor(CRN, credits, ID, instructor, distanceCourse=false, timeSlot, daysOfWeek=[]) {
         this.CRN = CRN;
         this.credits = credits;
@@ -9,5 +9,3 @@ class Section {
         this.daysOfWeek = daysOfWeek;
     }
 }
-
-module.exports = Section;
