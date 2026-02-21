@@ -18,12 +18,18 @@ export function Calender() {
 
   const location = useLocation();
   const courses = location.state?.courses || []; // get courses from Department
+  const constraints = location.state?.constraints || {
+    isMWF: false,
+    isTT: false,
+    earliestTime: null,
+    latestTime: null,
+  };
 
   for (const course of courses) {
     console.log(`Course: ${course.name}`);
   }
 
-  const schedules = main(courses); // generate schedules using algorithm
+  const schedules = main(courses, constraints); // generate schedules using algorithm
 
   for (const schedule of schedules) {
     console.log("Schedule:");

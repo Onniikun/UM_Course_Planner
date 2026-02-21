@@ -18,6 +18,10 @@ export function Department() {
   const [selectedMajor, setSelectedMajor] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [submitted, setSubmitted] = useState(false);
+  const [isMWF, setIsMWF] = useState(false);
+  const [isTT, setIsTT] = useState(false);
+  const [earliestTime, setEarliestTime] = useState('');
+  const [latestTime, setLatestTime] = useState('');
 
   useEffect(() => {
     if (selectedDepartment) {
@@ -55,7 +59,7 @@ export function Department() {
       .map(c => courseMap.get(c.value))
       .filter(Boolean);
 
-    // Prevent duplicates e
+    // Prevent duplicates
     setSelectedCourses(prev => {
       const existing = new Set(prev.map(c => c.name));
       const merged = [
@@ -66,13 +70,51 @@ export function Department() {
     });
 
     setSubmitted(true); // visual feedback
-    setSelectedMajor([]); t
+    setSelectedMajor([]);
   };
 
   return (
     <div>
       <h1>Course Registration</h1>
       <p>Here you can register for your Department/Major</p>
+
+      <ul>
+        <input
+          type="checkbox"
+          id="isMWF"
+          checked={isMWF}
+          onChange={(e) => setIsMWF(e.target.checked)}
+        />
+        <label htmlFor="isMWF">MWF Classes</label>
+
+        <input
+          type="checkbox"
+          id="isTT"
+          checked={isTT}
+          onChange={(e) => setIsTT(e.target.checked)}
+        />
+        <label htmlFor="isTT">TT Classes</label>
+
+        <li>
+          <label htmlFor="earliest">Earliest Time (Minutes since 12 am):</label>
+          <input
+            type="number"
+            id="earliest"
+            value={earliestTime}
+            onChange={(e) => setEarliestTime(e.target.value)}
+          />
+        </li>
+
+        <li>
+          <label htmlFor="latest">Latest Time (Minutes since 12 am):</label>
+          <input
+            type="number"
+            id="latest"
+            value={latestTime}
+            onChange={(e) => setLatestTime(e.target.value)}
+          />
+        </li>
+      </ul>
 
       <div className="courses-container">
         {/* Department Selection */}
@@ -128,7 +170,15 @@ export function Department() {
             alert('Please submit at least one course');
           } else {
             navigate('Calender', {
-              state: { courses: selectedCourses }
+              state: {
+                courses: selectedCourses,
+                constraints: {
+                  isMWF,
+                  isTT,
+                  earliestTime: Number(earliestTime),
+                  latestTime: Number(latestTime),
+                }
+              }
             });
           }
         }}
