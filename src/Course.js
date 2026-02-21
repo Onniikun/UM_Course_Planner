@@ -1,6 +1,7 @@
-class Course {
-    constructor(name, spanning=false, requiresLab=false, passFailCourse=false) {
+export class Course {
+    constructor(name, title, spanning=false, requiresLab=false, passFailCourse=false) {
         this.name = name;
+        this.title = title;
         this.spanning = spanning;
         this.requiresLab = requiresLab;
         this.passFailCourse = passFailCourse;
@@ -18,5 +19,3 @@ class Course {
         this.labSections.push(section);
     }
 }
-
-module.exports = Course;
