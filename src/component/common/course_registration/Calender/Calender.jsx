@@ -146,7 +146,7 @@ export function Calender() {
     <>
       <div id="container">
         <div className="calendar-wrapper">
-          <ScheduleXCalendar calendarApp={calender} />
+            <ScheduleXCalendar calendarApp={calender} />
         </div>
 
         <div>
