@@ -4,9 +4,10 @@ import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom'
 import { Department } from './component/common/course_registration/Department';
 import { Contact } from './component/common/contact/contact';
-import { CourseLoader } from './CourseLoader.js';
+import { main } from './algorithm.js';
+// import { filter } from './filterCourses.js';
 
-CourseLoader();
+main();
 
 function App() {
 
