@@ -1,27 +1,28 @@
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 import './Department.css';
-import { subjectOptions, courseOptions } from '../../../apis/data.js';
+import { subjectOptions } from '../../../apis/data.js';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadCourses } from '../../../courseLoader';
 import fallCourseList from '../../../fallCourseList.csv?raw';
-import winterCourseList from '../../../winterSummerCourseList.csv?raw';
 
-const courseMap = loadCourses(fallCourseList); // Load courses once at the top level
-
-const selectedCourses = []; // global accumulator
-let dept = "";
+const courseMap = loadCourses(fallCourseList); // Load once
 
 export function Department() {
   const navigate = useNavigate();
+  const animatedComponents = makeAnimated();
+
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [optionMajor, setOptionMajor] = useState([]);
   const [selectedMajor, setSelectedMajor] = useState([]);
+  const [selectedCourses, setSelectedCourses] = useState([]);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     if (selectedDepartment) {
-      dept = selectedDepartment.value;
+      const dept = selectedDepartment.value;
+
       const major = Array.from(courseMap.entries())
         .filter(([courseName]) => courseName.startsWith(dept))
         .map(([courseName, course]) => ({
@@ -29,12 +30,8 @@ export function Department() {
           label: `${courseName} - ${course.title}`,
         }));
 
-      console.log('Dept:', dept);
-      console.log('Total courses:', courseMap.size);
-      console.log('Filtered courses:', major.length);
-
       setOptionMajor(major);
-      setSelectedMajor([]);
+      setSelectedMajor([]); // reset course picker only (not submitted courses)
     } else {
       setOptionMajor([]);
       setSelectedMajor([]);
@@ -43,13 +40,34 @@ export function Department() {
 
   const handleDepartmentChange = (option) => {
     setSelectedDepartment(option);
+    setSubmitted(false); // reset visual state when changing dept
   };
 
   const handleMajorChange = (option) => {
-    setSelectedMajor(option || []); // ensure it's always an array
+    setSelectedMajor(option || []);
+    setSubmitted(false);
   };
 
-  const animatedComponents = makeAnimated();
+  const handleSubmit = () => {
+    if (selectedMajor.length === 0) return;
+
+    const newCourses = selectedMajor
+      .map(c => courseMap.get(c.value))
+      .filter(Boolean);
+
+    // Prevent duplicates e
+    setSelectedCourses(prev => {
+      const existing = new Set(prev.map(c => c.name));
+      const merged = [
+        ...prev,
+        ...newCourses.filter(c => !existing.has(c.name))
+      ];
+      return merged;
+    });
+
+    setSubmitted(true); // visual feedback
+    setSelectedMajor([]); t
+  };
 
   return (
     <div>
@@ -80,13 +98,17 @@ export function Department() {
           isMulti
         />
 
-        {/* Submit Button */}
-        <button className="button" >
-          Submit
+        {/* Submit Button with Visual Feedback */}
+        <button
+          className={`button ${submitted ? 'submitted' : ''}`}
+          onClick={handleSubmit}
+          disabled={selectedMajor.length === 0}
+        >
+          {submitted ? 'Added ✓' : 'Add Courses'}
         </button>
       </div>
 
-      {/* Selected Courses Display */}
+      {/* Selected Courses Display (persistent) */}
       <div className="selected-courses">
         <h2>Selected Courses:</h2>
         <ul>
@@ -96,21 +118,17 @@ export function Department() {
             </li>
           ))}
         </ul>
-
       </div>
 
-      {/* Next Button */}
+      {/* Next Button now uses ALL submitted courses */}
       <button
         className="button"
         onClick={() => {
-          if (!selectedDepartment || selectedMajor.length === 0) {
-            alert('Please select a Major or a Course');
+          if (selectedCourses.length === 0) {
+            alert('Please submit at least one course');
           } else {
-            // collect course objects
-            const coursesToSend = selectedMajor.map(c => courseMap.get(c.value));
-
             navigate('Calender', {
-              state: { courses: coursesToSend }
+              state: { courses: selectedCourses }
             });
           }
         }}
