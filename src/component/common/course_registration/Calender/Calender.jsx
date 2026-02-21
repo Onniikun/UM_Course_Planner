@@ -159,7 +159,7 @@ export function Calender() {
               <ul>
                 {schedule.map((section, idx) => (
                   <li key={idx}>
-                    CRN: {section.CRN}, Time: {section.timeSlot.startTime}-{section.timeSlot.endTime}
+                    Name: {section.name}, CRN: {section.CRN}, Time: {section.timeSlot.startTime}-{section.timeSlot.endTime}
                   </li>
                 ))}
               </ul>
