@@ -1,6 +1,7 @@
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 import './Department.css';
+import logo from '../../../apis/logo-2.png';
 import { subjectOptions, courseOptions } from '../../../apis/data.js';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -52,6 +53,7 @@ useEffect(() => {
   const animatedComponents = makeAnimated();
   return (
     <div>
+       <img className="logo" src={logo} alt="University of Manitoba Logo" />
       <h1>Course Registration</h1>
       <p>Here you can register for your Department/Major</p>
       <div className="courses-container">
