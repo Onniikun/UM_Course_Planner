@@ -1,0 +1,10 @@
+.navbar {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    height: 100px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #272B29;
+}
