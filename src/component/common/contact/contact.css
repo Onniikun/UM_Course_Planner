@@ -1,0 +1,29 @@
+.contact-title{
+  margin-top: 0.1px;
+    position: relative;
+    font-size: 40px;
+}
+.contact-card {
+  padding: 1px;
+  border-radius: 12px;
+  max-width: 500px;
+  text-align: center;
+}
+
+.contact-text {
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+.contact-button {
+  display: inline-block;
+  padding: 12px 20px;
+  background-color: darkblue;
+  color: white;
+  text-decoration: none;
+}
+
+.contact-button:hover {
+  background-color: #5a162c;
+  transform: translateY(-2px);
+}

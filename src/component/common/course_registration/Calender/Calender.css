@@ -1,0 +1,22 @@
+.sx-react-calendar-wrapper {
+  position: relative;
+  width: 1200px;
+  max-width: 100vw;
+  height: 560px;
+  margin-top: 1.5%;
+  max-height: 90vh;
+}
+
+body {
+  height: 100px;
+
+}
+
+#container {
+    display: flex;
+    flex-direction: horizontal¡;
+}
+
+#generated-container {
+  max-height: 800px;
+}
