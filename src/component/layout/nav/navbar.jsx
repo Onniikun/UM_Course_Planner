@@ -4,10 +4,10 @@ import './navbar.css';
 
 export function Navbar() {
     return (
-        <> 
+        <>
         <div className="navbar">
-                <NavLink to="/">Home</NavLink> 
-                <NavLink to="/Registration">Registration</NavLink> 
+                <NavLink to="/">Home</NavLink>
+                <NavLink to="/Registration">Registration</NavLink>
                 <NavLink to="/Contact">Contact</NavLink>
         </div>
         </>
