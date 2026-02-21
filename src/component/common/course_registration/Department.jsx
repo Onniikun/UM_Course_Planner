@@ -1,25 +1,20 @@
-import React from 'react';
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
-import AsyncSelect from 'react-select/async';
 import './Department.css';
+import { mockOptions, mockMajorOptions } from '../../../apis/mockData';
+import React, { useState } from 'react';
 
 export function Department() {
 
-/**
- * testing data
- */
-const options = [
-    { value: 'course1', label: 'Course 1' },
-    { value: 'course2', label: 'Course 2' },
-    { value: 'course3', label: 'Course 3' },
-    { value: 'course4', label: 'Course 4' },
-    { value: 'course5', label: 'Course 5' },
-]
-
-const MyComponent = () => (
-  <Select options={options} />
-)
+const [selectedDepartment, setSelectedDepartment] = useState(null);
+const [optionMajor, setoptionMajor] = useState([]);
+const [selectedMajor, setSelectedMajor] = useState(null);
+const handleChange = (option) => {
+    setSelectedDepartment(option);
+}
+const major = mockMajorOptions[selectedDepartment?.value] || []; {
+    setoptionMajor(major);
+}
 const animatedComponents = makeAnimated();
     return (
         <div> 
@@ -29,9 +24,18 @@ const animatedComponents = makeAnimated();
                 <Select className="custom-select" 
                 closeMenuOnSelect={false}
                 components={animatedComponents}
-                isMulti
-                options={options} />
-                <button className="button">Submit</button>
+                options={mockOptions}
+                value={selectedOption}
+                onChange={handleChange}
+                />
+                <Select className="custom-select" 
+                components={animatedComponents}
+                options={optionMajor}
+                value={selectedMajor}
+                onChange={handleChange}
+                />
+                <button className="button" onClick={() => alert('Course Registered!')}>
+                    Submit</button>
             </div>
         </div>
     );
