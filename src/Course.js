@@ -18,4 +18,8 @@ export class Course {
         if (!section) return;
         this.labSections.push(section);
     }
+
+    getName() {
+        return this.name;
+    }
 }

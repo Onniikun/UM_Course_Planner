@@ -93,6 +93,7 @@ export function loadCourses(courseList) {
     // --- Create TimeSlot and Section ---
     const timeSlot = new TimeSlot(startTime, endTime, startDate, endDate);
     const section = new Section(
+      course.getName(),
       CRN,
       credits,
       ID,
