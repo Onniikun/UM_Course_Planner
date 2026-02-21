@@ -65,13 +65,14 @@ function convertCoursesToEvents(courses) {
 
       if (matchingDay) {
         events.push({
-          id: `${course.ID}_${course.CRN}_${current.getFullYear()}_${current.getMonth() + 1}_${current.getDate()}`, // safe id
-          name: `${course.name} (${course.ID})\nInstructor: ${course.instructor}\nCredits: ${course.credits}`, // display course info
+          id: course.CRN,
+          name: course.name,
+          title: course.name,
           start: Temporal.ZonedDateTime.from({
             year: current.getFullYear(),
             month: current.getMonth() + 1,
             day: current.getDate(),
-            hour: startHour,
+            hour: startHour-6, // correctional offset for timezone correlation
             minute: startMinute,
             timeZone: "America/Winnipeg",
           }),
@@ -79,7 +80,7 @@ function convertCoursesToEvents(courses) {
             year: current.getFullYear(),
             month: current.getMonth() + 1,
             day: current.getDate(),
-            hour: endHour,
+            hour: endHour-6, // correctional offset for timezone correlation
             minute: endMinute,
             timeZone: "America/Winnipeg",
           }),
